@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "CrosswordPuzzle",
+    "slug": "CrosswordPuzzle",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "CrosswordPuzzle"
+}
