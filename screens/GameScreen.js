@@ -6,6 +6,7 @@ import {
   Dimensions,
   TouchableOpacity,
   TextInput,
+  Keyboard,
 } from 'react-native';
 
 import { FlatGrid } from 'react-native-super-grid';
@@ -18,6 +19,8 @@ const GameScreen = () => {
   const screenWidth = Dimensions.get('screen').width;
 
   const squareDimension = screenWidth / 16;
+
+  const inputRef = useRef();
 
   /*   useEffect(() => {
 
@@ -47,7 +50,7 @@ const GameScreen = () => {
 
   const [items, setItems] = useState(cells);
 
-  const inputRef = useRef();
+  const [letterPlayed, setLetterPlayed] = useState('');
 
   const selectSquare = (item) => {
     if (item === highligthedCell) {
@@ -99,8 +102,17 @@ const GameScreen = () => {
                 ]}
                 onPress={() => selectSquare(item)}
               >
-                <Text style={styles.itemName}>{item.number}</Text>
-                <Text ref={inputRef}></Text>
+                <Text style={styles.itemNumber}>{item.number}</Text>
+
+                <Text style={styles.letter}>{letterPlayed}</Text>
+
+                <TextInput
+                  caretHidden
+                  ref={inputRef}
+                  maxLength={1}
+                  style={styles.inputView}
+                  onChangeText={(val) => setLetterPlayed(val)}
+                />
               </TouchableOpacity>
             );
           }
@@ -116,15 +128,29 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   itemContainer: {
-    justifyContent: 'flex-start',
     backgroundColor: 'white',
     borderWidth: 0.5,
     borderColor: 'black',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  itemName: {
+  itemNumber: {
     fontSize: 8,
     color: 'black',
     fontWeight: '600',
+    position: 'absolute',
+    bottom: '60%',
+    right: '60%',
+  },
+  letter: {
+    fontSize: 15,
+    color: 'black',
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  inputView: {
+    opacity: 0,
+    height: 0,
   },
 });
 
