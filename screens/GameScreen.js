@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -43,23 +43,32 @@ const GameScreen = () => {
 
 },[]) */
 
+  const [highligthedCell, setHighligthedCell] = useState({});
+
   const [items, setItems] = useState(cells);
 
+  const inputRef = useRef();
+
   const selectSquare = (item) => {
-    let listItems = cells;
+    if (item === highligthedCell) {
+      setHighligthedCell({});
+    } else {
+      let listItems = cells;
 
-    let itemsWithSelected = listItems.map((i) => {
-      if (i.x === item.x && i.y === item.y && i.type !== 'block') {
-        return { ...i, isSelected: true };
-      } else {
-        return i;
-      }
-    });
+      let selectedCell;
 
-    setItems(itemsWithSelected);
+      listItems.map((i) => {
+        if (i === item && i.type !== 'block') {
+          selectedCell = i;
+        }
+      });
+
+      inputRef.current.focus();
+      setHighligthedCell(selectedCell);
+    }
   };
 
-  console.log(items);
+  console.log(highligthedCell);
 
   return (
     <View style={styles.screen}>
@@ -78,28 +87,20 @@ const GameScreen = () => {
                 ]}
               ></View>
             );
-          } else if (item.isSelected) {
+          } else {
             return (
               <TouchableOpacity
                 style={[
                   styles.itemContainer,
-                  {
-                    height: squareDimension,
-                    backgroundColor: Colors.selectedSquare,
-                  },
+                  { height: squareDimension },
+                  highligthedCell === item
+                    ? { backgroundColor: Colors.selectedSquare }
+                    : {},
                 ]}
                 onPress={() => selectSquare(item)}
               >
                 <Text style={styles.itemName}>{item.number}</Text>
-              </TouchableOpacity>
-            );
-          } else {
-            return (
-              <TouchableOpacity
-                style={[styles.itemContainer, { height: squareDimension }]}
-                onPress={() => selectSquare(item)}
-              >
-                <Text style={styles.itemName}>{item.number}</Text>
+                <Text ref={inputRef}></Text>
               </TouchableOpacity>
             );
           }
