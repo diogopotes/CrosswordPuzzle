@@ -1,16 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
   Text,
   Dimensions,
   TouchableOpacity,
-  TextInput,
-  Keyboard,
   FlatList,
 } from 'react-native';
-
-import { FlatGrid } from 'react-native-super-grid';
 
 import Colors from '../constants/Colors';
 
@@ -39,11 +35,7 @@ const GameScreen = () => {
 
   const squareDimension = screenWidth / 15;
 
-  const inputRef = useRef();
-
   const [highligthedCell, setHighligthedCell] = useState({});
-
-  const [letterPlayed, setLetterPlayed] = useState('');
 
   const [crosswordPuzzle, setCrosswordPuzzle] = useState(gameboard);
 
@@ -51,27 +43,54 @@ const GameScreen = () => {
     if (item === highligthedCell) {
       setHighligthedCell({});
     } else {
-      let listItems = crosswordPuzzle;
+      let copyCrossword = crosswordPuzzle;
 
       let selectedCell;
 
-      listItems.map((i) => {
+      copyCrossword.map((i) => {
         if (i === item && i.type !== 'block') {
           selectedCell = i;
         }
       });
 
-      inputRef.current.focus();
       setHighligthedCell(selectedCell);
     }
   };
+  const alphabet = [
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'H',
+    'I',
+    'J',
+    'K',
+    'L',
+    'M',
+    'N',
+    'O',
+    'P',
+    'Q',
+    'R',
+    'S',
+    'T',
+    'U',
+    'V',
+    'W',
+    'X',
+    'Y',
+    'Z',
+  ];
 
-  const inputLetter = () => {
+  const inputLetter = (letter) => {
     let updatedCrossword = crosswordPuzzle;
 
     updatedCrossword = updatedCrossword.map((square) => {
-      if (square.x === item.x && square.y === item.y) {
-        return { ...square, playerLetter: value };
+      if (highligthedCell.x === square.x && highligthedCell.y === square.y) {
+        return { ...square, playerLetter: letter };
       } else {
         return square;
       }
@@ -130,6 +149,21 @@ const GameScreen = () => {
           }}
         />
       )}
+      <View style={styles.container}>
+        <View style={styles.keyboard}>
+          {alphabet.map((letter) => {
+            return (
+              <TouchableOpacity
+                style={styles.letterContainer}
+                onPress={() => inputLetter(letter)}
+                key={letter}
+              >
+                <Text style={styles.keyboardLetter}>{letter}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
     </View>
   );
 };
@@ -163,6 +197,32 @@ const styles = StyleSheet.create({
   inputView: {
     width: 0,
     height: 0,
+  },
+  container: {
+    alignItems: 'center',
+    backgroundColor: Colors.primary,
+    flex: 2,
+    flexDirection: 'row',
+  },
+  keyboard: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginLeft: 5,
+    marginRight: 5,
+  },
+  keyboardLetter: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  letterContainer: {
+    width: 30,
+    height: 35,
+    borderRadius: 4,
+    margin: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'white',
   },
 });
 
