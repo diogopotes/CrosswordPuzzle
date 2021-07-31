@@ -4,10 +4,10 @@ import thunk from 'redux-thunk';
 
 import { composeWithDevTools } from 'redux-devtools-extension';
 
-import { gameboardReducer } from './reducers/gameboardReducers';
+import { gameReducer } from './reducers/gameReducers';
 
 const rootReducer = combineReducers({
-  gameboard: gameboardReducer,
+  game: gameReducer,
 });
 
 const middleware = composeWithDevTools(applyMiddleware(thunk));

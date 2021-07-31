@@ -10,14 +10,14 @@ import {
 
 import Colors from '../constants/Colors';
 
-import { getPuzzle } from '../redux/actions/gameboardActions';
+import { getPuzzle } from '../redux/actions/gameActions';
 
 import { useDispatch, useSelector } from 'react-redux';
 
 const GameScreen = () => {
   const dispatch = useDispatch();
 
-  const { loading, error, gameboard } = useSelector((state) => state.gameboard);
+  const { loading, gameboard, error } = useSelector((state) => state.game);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -37,7 +37,7 @@ const GameScreen = () => {
 
   const [highligthedCell, setHighligthedCell] = useState({});
 
-  const [crosswordPuzzle, setCrosswordPuzzle] = useState(gameboard);
+  const [crosswordPuzzle, setCrosswordPuzzle] = useState(gameboard.cells);
 
   const selectSquare = (item) => {
     if (item === highligthedCell) {
@@ -90,7 +90,7 @@ const GameScreen = () => {
 
     updatedCrossword = updatedCrossword.map((square) => {
       if (highligthedCell.x === square.x && highligthedCell.y === square.y) {
-        return { ...square, playerLetter: letter };
+        return { ...square, playedLetter: letter };
       } else {
         return square;
       }
@@ -142,14 +142,14 @@ const GameScreen = () => {
                 >
                   <Text style={styles.itemNumber}>{item.number}</Text>
 
-                  <Text style={styles.letter}>{item.playerLetter}</Text>
+                  <Text style={styles.letter}>{item.playedLetter}</Text>
                 </TouchableOpacity>
               );
             }
           }}
         />
       )}
-      <View style={styles.container}>
+      <View style={styles.keyboardContainer}>
         <View style={styles.keyboard}>
           {alphabet.map((letter) => {
             return (
@@ -194,11 +194,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
   },
-  inputView: {
-    width: 0,
-    height: 0,
-  },
-  container: {
+  keyboardContainer: {
     alignItems: 'center',
     backgroundColor: Colors.primary,
     flex: 2,
