@@ -14,6 +14,8 @@ import { getPuzzle } from '../redux/actions/gameActions';
 
 import { useDispatch, useSelector } from 'react-redux';
 
+import { Feather } from '@expo/vector-icons';
+
 const GameScreen = () => {
   const dispatch = useDispatch();
 
@@ -40,7 +42,7 @@ const GameScreen = () => {
   const [crosswordPuzzle, setCrosswordPuzzle] = useState(gameboard.cells);
 
   const selectSquare = (item) => {
-    if (item === highligthedCell) {
+    if (item.x === highligthedCell.x && item.y === highligthedCell.y) {
       setHighligthedCell({});
     } else {
       let copyCrossword = crosswordPuzzle;
@@ -88,15 +90,26 @@ const GameScreen = () => {
   const inputLetter = (letter) => {
     let updatedCrossword = crosswordPuzzle;
 
-    updatedCrossword = updatedCrossword.map((square) => {
-      if (highligthedCell.x === square.x && highligthedCell.y === square.y) {
-        return { ...square, playedLetter: letter };
-      } else {
-        return square;
-      }
-    });
+    if (letter === 'delete') {
+      updatedCrossword = updatedCrossword.map((square) => {
+        if (highligthedCell.x === square.x && highligthedCell.y === square.y) {
+          return { ...square, playedLetter: '' };
+        } else {
+          return square;
+        }
+      });
+    } else {
+      updatedCrossword = updatedCrossword.map((square) => {
+        if (highligthedCell.x === square.x && highligthedCell.y === square.y) {
+          return { ...square, playedLetter: letter };
+        } else {
+          return square;
+        }
+      });
+    }
 
     setCrosswordPuzzle(updatedCrossword);
+    //setHighligthedCell({});
   };
 
   if (isLoading) {
@@ -110,45 +123,51 @@ const GameScreen = () => {
   return (
     <View style={styles.screen}>
       {crosswordPuzzle !== undefined && (
-        <FlatList
-          data={crosswordPuzzle}
-          numColumns={15}
-          keyExtractor={(item, index) => 'key_' + item.x + item.y}
-          renderItem={({ item }) => {
-            if (!item.solution) {
-              return (
-                <View
-                  style={[
-                    styles.itemContainer,
-                    {
-                      height: squareDimension,
-                      width: squareDimension,
-                      backgroundColor: 'black',
-                    },
-                  ]}
-                ></View>
-              );
-            } else {
-              return (
-                <TouchableOpacity
-                  style={[
-                    styles.itemContainer,
-                    { height: squareDimension, width: squareDimension },
-                    highligthedCell === item
-                      ? { backgroundColor: Colors.selectedSquare }
-                      : {},
-                  ]}
-                  onPress={() => selectSquare(item)}
-                >
-                  <Text style={styles.itemNumber}>{item.number}</Text>
+        <View style={styles.crosswordContainer}>
+          <FlatList
+            data={crosswordPuzzle}
+            numColumns={15}
+            keyExtractor={(item, index) => 'key_' + item.x + item.y}
+            renderItem={({ item }) => {
+              if (!item.solution) {
+                return (
+                  <View
+                    style={[
+                      styles.itemContainer,
+                      {
+                        height: squareDimension,
+                        width: squareDimension,
+                        backgroundColor: 'black',
+                      },
+                    ]}
+                  ></View>
+                );
+              } else {
+                return (
+                  <TouchableOpacity
+                    style={[
+                      styles.itemContainer,
+                      { height: squareDimension, width: squareDimension },
+                      highligthedCell.x === item.x &&
+                      highligthedCell.y === item.y
+                        ? { backgroundColor: Colors.selectedSquare }
+                        : {},
+                    ]}
+                    onPress={() => selectSquare(item)}
+                  >
+                    <Text style={styles.itemNumber}>{item.number}</Text>
 
-                  <Text style={styles.letter}>{item.playedLetter}</Text>
-                </TouchableOpacity>
-              );
-            }
-          }}
-        />
+                    <Text style={styles.letter}>{item.playedLetter}</Text>
+                  </TouchableOpacity>
+                );
+              }
+            }}
+          />
+        </View>
       )}
+      <View style={styles.clueContainer}>
+        <Text style={styles.clueText}>CLUE</Text>
+      </View>
       <View style={styles.keyboardContainer}>
         <View style={styles.keyboard}>
           {alphabet.map((letter) => {
@@ -162,6 +181,12 @@ const GameScreen = () => {
               </TouchableOpacity>
             );
           })}
+          <TouchableOpacity
+            style={[styles.letterContainer, { width: 60 }]}
+            onPress={() => inputLetter('delete')}
+          >
+            <Feather name="delete" size={26} color="black" />
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -172,6 +197,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  crosswordContainer: {
+    flex: 6,
   },
   itemContainer: {
     backgroundColor: 'white',
@@ -197,7 +225,7 @@ const styles = StyleSheet.create({
   keyboardContainer: {
     alignItems: 'center',
     backgroundColor: Colors.primary,
-    flex: 2,
+    flex: 3,
     flexDirection: 'row',
   },
   keyboard: {
@@ -219,6 +247,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'white',
+  },
+  clueContainer: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  clueText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.primary,
   },
 });
 
