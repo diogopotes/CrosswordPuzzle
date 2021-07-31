@@ -22,35 +22,21 @@ const GameScreen = () => {
 
   const inputRef = useRef();
 
-  /*   useEffect(() => {
-
-    const getData = async () => {
-
-            try {
-
-                const {data} = await axios.get('data/data.json');
-
-                setListEmployees(data.employees);
-
-            } catch(err) {
-
-                setError(true);
-                console.log(err.message);
-
-            }
-
-    }
-
-   
-    getData();
-
-},[]) */
-
   const [highligthedCell, setHighligthedCell] = useState({});
 
   const [items, setItems] = useState(cells);
 
   const [letterPlayed, setLetterPlayed] = useState('');
+
+  const [playerGameboard, setPlayerGameboard] = useState(
+    cells.map((c) => {
+      if (c.type !== 'block') {
+        return { ...c, playerLetter: '' };
+      }
+    })
+  );
+
+  console.log(playerGameboard);
 
   const selectSquare = (item) => {
     if (item === highligthedCell) {
@@ -71,13 +57,17 @@ const GameScreen = () => {
     }
   };
 
-  console.log(highligthedCell);
+  const inputLetter = (value) => {
+    setLetterPlayed(value);
+  };
+
+  //console.log(letterPlayed);
 
   return (
     <View style={styles.screen}>
       <FlatGrid
         itemDimension={squareDimension}
-        data={items}
+        data={playerGameboard}
         //fixed
         spacing={0}
         renderItem={({ item }) => {
@@ -105,19 +95,21 @@ const GameScreen = () => {
                 <Text style={styles.itemNumber}>{item.number}</Text>
 
                 <Text style={styles.letter}>{letterPlayed}</Text>
-
-                <TextInput
-                  caretHidden
-                  ref={inputRef}
-                  maxLength={1}
-                  style={styles.inputView}
-                  onChangeText={(val) => setLetterPlayed(val)}
-                />
               </TouchableOpacity>
             );
           }
         }}
       />
+      <View style={styles.inputView}>
+        <TextInput
+          caretHidden
+          ref={inputRef}
+          maxLength={1}
+          //value={letterPlayed}
+          //onfocus={() => (value = '')}
+          onChangeText={(val) => inputLetter(val)}
+        />
+      </View>
     </View>
   );
 };
@@ -149,8 +141,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   inputView: {
-    opacity: 0,
-    height: 0,
+    height: 10,
   },
 });
 

@@ -4,7 +4,11 @@ import thunk from 'redux-thunk';
 
 import { composeWithDevTools } from 'redux-devtools-extension';
 
-const rootReducer = combineReducers({});
+import { gameboardReducer } from './reducers/gameboardReducers';
+
+const rootReducer = combineReducers({
+  gameboard: gameboardReducer,
+});
 
 const middleware = composeWithDevTools(applyMiddleware(thunk));
 
