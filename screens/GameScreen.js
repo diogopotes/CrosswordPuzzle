@@ -41,9 +41,13 @@ const GameScreen = () => {
 
   const [crosswordPuzzle, setCrosswordPuzzle] = useState(gameboard.cells);
 
+  const [listClues, setListClues] = useState(gameboard.clues);
+
+  const [clue, setClue] = useState('');
+
   const selectSquare = (item) => {
     if (item.x === highligthedCell.x && item.y === highligthedCell.y) {
-      setHighligthedCell({});
+      deselect();
     } else {
       let copyCrossword = crosswordPuzzle;
 
@@ -56,8 +60,34 @@ const GameScreen = () => {
       });
 
       setHighligthedCell(selectedCell);
+      getClue(selectedCell);
     }
   };
+
+  const getClue = (selectedCell) => {
+    let clueNumber;
+
+    let tempNumber;
+
+    crosswordPuzzle.map((i) => {
+      if (i.number) {
+        tempNumber = i.number;
+      }
+
+      if (i.x === selectedCell.x && i.y === selectedCell.y) {
+        clueNumber = tempNumber;
+      }
+    });
+
+    console.log(clueNumber);
+
+    listClues.map((clue) => {
+      if (clue.number === clueNumber) {
+        setClue(clue.text);
+      }
+    });
+  };
+
   const alphabet = [
     'A',
     'B',
@@ -109,7 +139,10 @@ const GameScreen = () => {
     }
 
     setCrosswordPuzzle(updatedCrossword);
-    //setHighligthedCell({});
+  };
+
+  const deselect = () => {
+    setHighligthedCell({});
   };
 
   if (isLoading) {
@@ -131,7 +164,7 @@ const GameScreen = () => {
             renderItem={({ item }) => {
               if (!item.solution) {
                 return (
-                  <View
+                  <TouchableOpacity
                     style={[
                       styles.itemContainer,
                       {
@@ -140,7 +173,9 @@ const GameScreen = () => {
                         backgroundColor: 'black',
                       },
                     ]}
-                  ></View>
+                    onPress={() => deselect()}
+                    activeOpacity={1}
+                  ></TouchableOpacity>
                 );
               } else {
                 return (
@@ -165,10 +200,18 @@ const GameScreen = () => {
           />
         </View>
       )}
-      <View style={styles.clueContainer}>
-        <Text style={styles.clueText}>CLUE</Text>
-      </View>
-      <View style={styles.keyboardContainer}>
+      <TouchableOpacity
+        style={styles.clueContainer}
+        onPress={() => deselect()}
+        activeOpacity={1}
+      >
+        <Text style={styles.clueText}>{clue}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.keyboardContainer}
+        onPress={() => deselect()}
+        activeOpacity={1}
+      >
         <View style={styles.keyboard}>
           {alphabet.map((letter) => {
             return (
@@ -188,7 +231,7 @@ const GameScreen = () => {
             <Feather name="delete" size={26} color="black" />
           </TouchableOpacity>
         </View>
-      </View>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -257,7 +300,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
   },
   clueText: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     color: Colors.primary,
   },
