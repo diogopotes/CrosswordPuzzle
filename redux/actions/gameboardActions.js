@@ -6,15 +6,19 @@ import {
 
 import axios from 'axios';
 
+import { cells } from '../../data/crossword-puzzle.json';
+
 export const getPuzzle = () => async (dispatch) => {
   try {
     dispatch({ type: GAMEBOARD_REQUEST });
 
-    const { cells } = await axios.get('data/data.json');
+    //const { cells } = await axios.get('data/crossword-puzzle.json');
 
     const gameBoard = cells.map((c) => {
       if (c.type !== 'block') {
         return { ...c, playerLetter: '' };
+      } else {
+        return c;
       }
     });
 

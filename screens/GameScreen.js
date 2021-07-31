@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,42 +7,51 @@ import {
   TouchableOpacity,
   TextInput,
   Keyboard,
+  FlatList,
 } from 'react-native';
 
 import { FlatGrid } from 'react-native-super-grid';
 
 import Colors from '../constants/Colors';
 
-import { cells } from '../data/crossword-puzzle.json';
+import { getPuzzle } from '../redux/actions/gameboardActions';
+
+import { useDispatch, useSelector } from 'react-redux';
 
 const GameScreen = () => {
+  const dispatch = useDispatch();
+
+  const { loading, error, gameboard } = useSelector((state) => state.gameboard);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    dispatch(getPuzzle());
+  }, []);
+
+  useEffect(() => {
+    if (loading === false) {
+      setIsLoading(false);
+    }
+  }, [loading]);
+
   const screenWidth = Dimensions.get('screen').width;
 
-  const squareDimension = screenWidth / 16;
+  const squareDimension = screenWidth / 15;
 
   const inputRef = useRef();
 
   const [highligthedCell, setHighligthedCell] = useState({});
 
-  const [items, setItems] = useState(cells);
-
   const [letterPlayed, setLetterPlayed] = useState('');
 
-  const [playerGameboard, setPlayerGameboard] = useState(
-    cells.map((c) => {
-      if (c.type !== 'block') {
-        return { ...c, playerLetter: '' };
-      }
-    })
-  );
-
-  console.log(playerGameboard);
+  const [crosswordPuzzle, setCrosswordPuzzle] = useState(gameboard);
 
   const selectSquare = (item) => {
     if (item === highligthedCell) {
       setHighligthedCell({});
     } else {
-      let listItems = cells;
+      let listItems = crosswordPuzzle;
 
       let selectedCell;
 
@@ -57,59 +66,70 @@ const GameScreen = () => {
     }
   };
 
-  const inputLetter = (value) => {
-    setLetterPlayed(value);
+  const inputLetter = () => {
+    let updatedCrossword = crosswordPuzzle;
+
+    updatedCrossword = updatedCrossword.map((square) => {
+      if (square.x === item.x && square.y === item.y) {
+        return { ...square, playerLetter: value };
+      } else {
+        return square;
+      }
+    });
+
+    setCrosswordPuzzle(updatedCrossword);
   };
 
-  //console.log(letterPlayed);
+  if (isLoading) {
+    return (
+      <View>
+        <Text>LOADING...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.screen}>
-      <FlatGrid
-        itemDimension={squareDimension}
-        data={playerGameboard}
-        //fixed
-        spacing={0}
-        renderItem={({ item }) => {
-          if (!item.solution) {
-            return (
-              <View
-                style={[
-                  styles.itemContainer,
-                  { height: squareDimension, backgroundColor: 'black' },
-                ]}
-              ></View>
-            );
-          } else {
-            return (
-              <TouchableOpacity
-                style={[
-                  styles.itemContainer,
-                  { height: squareDimension },
-                  highligthedCell === item
-                    ? { backgroundColor: Colors.selectedSquare }
-                    : {},
-                ]}
-                onPress={() => selectSquare(item)}
-              >
-                <Text style={styles.itemNumber}>{item.number}</Text>
+      {crosswordPuzzle !== undefined && (
+        <FlatList
+          data={crosswordPuzzle}
+          numColumns={15}
+          keyExtractor={(item, index) => 'key_' + item.x + item.y}
+          renderItem={({ item }) => {
+            if (!item.solution) {
+              return (
+                <View
+                  style={[
+                    styles.itemContainer,
+                    {
+                      height: squareDimension,
+                      width: squareDimension,
+                      backgroundColor: 'black',
+                    },
+                  ]}
+                ></View>
+              );
+            } else {
+              return (
+                <TouchableOpacity
+                  style={[
+                    styles.itemContainer,
+                    { height: squareDimension, width: squareDimension },
+                    highligthedCell === item
+                      ? { backgroundColor: Colors.selectedSquare }
+                      : {},
+                  ]}
+                  onPress={() => selectSquare(item)}
+                >
+                  <Text style={styles.itemNumber}>{item.number}</Text>
 
-                <Text style={styles.letter}>{letterPlayed}</Text>
-              </TouchableOpacity>
-            );
-          }
-        }}
-      />
-      <View style={styles.inputView}>
-        <TextInput
-          caretHidden
-          ref={inputRef}
-          maxLength={1}
-          //value={letterPlayed}
-          //onfocus={() => (value = '')}
-          onChangeText={(val) => inputLetter(val)}
+                  <Text style={styles.letter}>{item.playerLetter}</Text>
+                </TouchableOpacity>
+              );
+            }
+          }}
         />
-      </View>
+      )}
     </View>
   );
 };
@@ -141,7 +161,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   inputView: {
-    height: 10,
+    width: 0,
+    height: 0,
   },
 });
 
