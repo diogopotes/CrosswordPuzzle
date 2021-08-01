@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import { NavigationContainer } from '@react-navigation/native';
 
-import LoadingScreen from './../screens/LoadingScreen';
+import PreloadScreen from '../screens/PreloadScreen';
 
 import GameScreen from './../screens/GameScreen';
 
@@ -20,24 +20,18 @@ export default function () {
 
     setTimeout(() => {
       setIsLoading(false);
-    }, 2500);
+    }, 2000);
   }, []);
 
-  /*   useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2500);
-  }); */
-
   if (isLoading) {
-    return <LoadingScreen />;
+    return <PreloadScreen />;
   }
 
   return (
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen
-          name="Game"
+          name="GameScreen"
           component={GameScreen}
           options={{
             headerTitle: 'Crossword Puzzle',
