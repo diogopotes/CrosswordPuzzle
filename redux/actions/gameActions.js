@@ -14,6 +14,7 @@ export const getPuzzle = () => async (dispatch) => {
 
     const listClues = clues;
 
+    //ADDING PLAYER'S PLAYED LETTER:
     const listCells = cells.map((cell) => {
       if (cell.type !== 'block') {
         return { ...cell, playedLetter: '' };
@@ -22,6 +23,7 @@ export const getPuzzle = () => async (dispatch) => {
       }
     });
 
+    //TRANSFORMING X AND Y FIELDS THAT HAVE RANGE TO AN ARRAY OF VALUES:
     listWords = words.map((word) => {
       if (word.x.includes('-')) {
         const index = word.x.indexOf('-');

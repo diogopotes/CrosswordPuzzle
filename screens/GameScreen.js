@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,7 +8,11 @@ import {
   FlatList,
 } from 'react-native';
 
+import LoadPuzzle from '../components/LoadPuzzle';
+
 import Colors from '../constants/Colors';
+
+import Alphabet from '../constants/Alphabet';
 
 import { getPuzzle } from '../redux/actions/gameActions';
 
@@ -19,11 +23,13 @@ import { Feather } from '@expo/vector-icons';
 const GameScreen = () => {
   const dispatch = useDispatch();
 
+  // DATA FROM REDUX:
   const { loading, gameboard, error } = useSelector((state) => state.game);
 
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    //GET DATA FROM REDUX AT MOUNTING
     dispatch(getPuzzle());
   }, []);
 
@@ -35,35 +41,31 @@ const GameScreen = () => {
 
   const screenWidth = Dimensions.get('screen').width;
 
-  const squareDimension = screenWidth / 15;
+  const squareDimension = screenWidth / 15; // CELL WIDTH AND HEIGHT
+
+  // GAME SCREEN STATES:
 
   const [highligthedCell, setHighligthedCell] = useState({});
 
   const [crosswordPuzzle, setCrosswordPuzzle] = useState(gameboard.cells);
-
-  const [listClues, setListClues] = useState(gameboard.clues);
-
-  const [listWords, setListWords] = useState(gameboard.words);
 
   const [clue, setClue] = useState({
     number: null,
     text: '',
   });
 
-  //var isHorizontal = true;
+  // CLUE POSITION REF VALUE (IF TRUE, IS HORIZONTAL):
+  const horizontalRef = useRef(true);
 
-  const [isHorizontal, setIsHorizontal] = useState(true);
+  const listClues = gameboard.clues;
 
-  /*   useEffect(() => {
-    console.log(isHorizontal);
-  }, [highligthedCell]); */
+  const listWords = gameboard.words;
 
-  console.log('is horizontal outside ' + isHorizontal);
+  // FUNCTION WHEN SELECTING A SQUARE (CELL):
 
   const selectSquare = (item) => {
     if (item.x === highligthedCell.x && item.y === highligthedCell.y) {
-      //isHorizontal = !isHorizontal;
-      setIsHorizontal(!isHorizontal);
+      horizontalRef.current = !horizontalRef.current;
       getClue(highligthedCell);
     } else {
       let copyCrossword = crosswordPuzzle;
@@ -75,12 +77,13 @@ const GameScreen = () => {
           selectedCell = i;
         }
       });
-      //isHorizontal = true;
-      getClue(selectedCell);
 
+      getClue(selectedCell);
       setHighligthedCell(selectedCell);
     }
   };
+
+  // FUNCTION TO GET CLUE:
 
   const getClue = (selectedCell) => {
     let x = selectedCell.x;
@@ -125,9 +128,7 @@ const GameScreen = () => {
       }
     });
 
-    console.log('ishorizontal inside' + isHorizontal);
-
-    if (isHorizontal === false) {
+    if (horizontalRef.current === false) {
       setClue({
         number: number_y,
         text: clue_y + ' (vert.)',
@@ -140,34 +141,7 @@ const GameScreen = () => {
     }
   };
 
-  const alphabet = [
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'I',
-    'J',
-    'K',
-    'L',
-    'M',
-    'N',
-    'O',
-    'P',
-    'Q',
-    'R',
-    'S',
-    'T',
-    'U',
-    'V',
-    'W',
-    'X',
-    'Y',
-    'Z',
-  ];
+  // FUNCTION OF USER LETTER INPUT:
 
   const inputLetter = (letter) => {
     let updatedCrossword = crosswordPuzzle;
@@ -193,6 +167,8 @@ const GameScreen = () => {
     setCrosswordPuzzle(updatedCrossword);
   };
 
+  // FUNCTION TO DESELECT CELL:
+
   const deselect = () => {
     setHighligthedCell({});
     setClue({
@@ -202,17 +178,14 @@ const GameScreen = () => {
   };
 
   if (isLoading) {
-    return (
-      <View>
-        <Text>LOADING...</Text>
-      </View>
-    );
+    return <LoadPuzzle />;
   }
 
   return (
     <View style={styles.screen}>
+      {/* CROSSWORD PUZZLE SECTION */}
       {crosswordPuzzle !== undefined && (
-        <View style={styles.crosswordContainer}>
+        <View style={[styles.crosswordContainer, { maxHeight: screenWidth }]}>
           <FlatList
             data={crosswordPuzzle}
             numColumns={15}
@@ -256,6 +229,7 @@ const GameScreen = () => {
           />
         </View>
       )}
+      {/* CLUE SECTION */}
       <TouchableOpacity
         style={styles.clueContainer}
         onPress={() => deselect()}
@@ -267,13 +241,14 @@ const GameScreen = () => {
           </Text>
         )}
       </TouchableOpacity>
+      {/* KEYBOARD SECTION */}
       <TouchableOpacity
         style={styles.keyboardContainer}
         onPress={() => deselect()}
         activeOpacity={1}
       >
         <View style={styles.keyboard}>
-          {alphabet.map((letter) => {
+          {Alphabet.map((letter) => {
             return (
               <TouchableOpacity
                 style={styles.letterContainer}
@@ -302,7 +277,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   crosswordContainer: {
-    flex: 6,
+    flex: 7,
   },
   itemContainer: {
     backgroundColor: 'white',

@@ -3,7 +3,7 @@ import { View, StyleSheet, Image, ActivityIndicator } from 'react-native';
 
 import Colors from '../constants/Colors';
 
-const LoadingScreen = () => {
+const PreloadScreen = () => {
   return (
     <View style={styles.screen}>
       <Image
@@ -33,4 +33,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoadingScreen;
+export default PreloadScreen;
