@@ -4,9 +4,9 @@ import {
   GAME_SUCCESS,
 } from '../constants/gameConstants';
 
-//import axios from 'axios';
+import { range } from 'lodash';
 
-import { cells, clues } from '../../data/crossword-puzzle.json';
+import { cells, clues, words } from '../../data/crossword-puzzle.json';
 
 export const getPuzzle = () => async (dispatch) => {
   try {
@@ -14,17 +14,40 @@ export const getPuzzle = () => async (dispatch) => {
 
     const listClues = clues;
 
-    const listCells = cells.map((c) => {
-      if (c.type !== 'block') {
-        return { ...c, playedLetter: '' };
+    const listCells = cells.map((cell) => {
+      if (cell.type !== 'block') {
+        return { ...cell, playedLetter: '' };
       } else {
-        return c;
+        return cell;
+      }
+    });
+
+    listWords = words.map((word) => {
+      if (word.x.includes('-')) {
+        const index = word.x.indexOf('-');
+        const firstNumber = parseInt(word.x.substr(0, index));
+        const lastNumber = parseInt(word.x.substr(index + 1));
+
+        let arrayX = range(firstNumber, lastNumber + 1, 1);
+
+        return { ...word, x: arrayX };
+      } else if (word.y.includes('-')) {
+        const index = word.y.indexOf('-');
+        const firstNumber = parseInt(word.y.substr(0, index));
+        const lastNumber = parseInt(word.y.substr(index + 1));
+
+        let arrayY = range(firstNumber, lastNumber + 1, 1);
+
+        return { ...word, y: arrayY };
+      } else {
+        return word;
       }
     });
 
     const gameBoard = {
       clues: listClues,
       cells: listCells,
+      words: listWords,
     };
 
     dispatch({ type: GAME_SUCCESS, payload: gameBoard });

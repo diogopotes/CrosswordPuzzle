@@ -43,11 +43,28 @@ const GameScreen = () => {
 
   const [listClues, setListClues] = useState(gameboard.clues);
 
-  const [clue, setClue] = useState('');
+  const [listWords, setListWords] = useState(gameboard.words);
+
+  const [clue, setClue] = useState({
+    number: null,
+    text: '',
+  });
+
+  //var isHorizontal = true;
+
+  const [isHorizontal, setIsHorizontal] = useState(true);
+
+  /*   useEffect(() => {
+    console.log(isHorizontal);
+  }, [highligthedCell]); */
+
+  console.log('is horizontal outside ' + isHorizontal);
 
   const selectSquare = (item) => {
     if (item.x === highligthedCell.x && item.y === highligthedCell.y) {
-      deselect();
+      //isHorizontal = !isHorizontal;
+      setIsHorizontal(!isHorizontal);
+      getClue(highligthedCell);
     } else {
       let copyCrossword = crosswordPuzzle;
 
@@ -58,34 +75,69 @@ const GameScreen = () => {
           selectedCell = i;
         }
       });
+      //isHorizontal = true;
+      getClue(selectedCell);
 
       setHighligthedCell(selectedCell);
-      getClue(selectedCell);
     }
   };
 
   const getClue = (selectedCell) => {
-    let clueNumber;
+    let x = selectedCell.x;
 
-    let tempNumber;
+    let y = selectedCell.y;
 
-    crosswordPuzzle.map((i) => {
-      if (i.number) {
-        tempNumber = i.number;
-      }
+    let word_id_x; //horizontal word
 
-      if (i.x === selectedCell.x && i.y === selectedCell.y) {
-        clueNumber = tempNumber;
+    let word_id_y; //vertical word
+
+    listWords.map((word) => {
+      if (
+        word.x instanceof Array &&
+        word.x.includes(parseInt(x)) &&
+        word.y === y
+      ) {
+        word_id_x = word.id;
+      } else if (
+        word.y instanceof Array &&
+        word.y.includes(parseInt(y)) &&
+        word.x === x
+      ) {
+        word_id_y = word.id;
       }
     });
 
-    console.log(clueNumber);
+    let clue_x; //horizontal clue
 
-    listClues.map((clue) => {
-      if (clue.number === clueNumber) {
-        setClue(clue.text);
+    let clue_y; //vertical clue
+
+    let number_x; //horizontal number
+
+    let number_y; //vertical number
+
+    listClues.map((c) => {
+      if (c.word === word_id_x) {
+        clue_x = c.text;
+        number_x = c.number;
+      } else if (c.word === word_id_y) {
+        clue_y = c.text;
+        number_y = c.number;
       }
     });
+
+    console.log('ishorizontal inside' + isHorizontal);
+
+    if (isHorizontal === false) {
+      setClue({
+        number: number_y,
+        text: clue_y + ' (vert.)',
+      });
+    } else {
+      setClue({
+        number: number_x,
+        text: clue_x + ' (horiz.)',
+      });
+    }
   };
 
   const alphabet = [
@@ -143,6 +195,10 @@ const GameScreen = () => {
 
   const deselect = () => {
     setHighligthedCell({});
+    setClue({
+      number: null,
+      text: '',
+    });
   };
 
   if (isLoading) {
@@ -205,7 +261,11 @@ const GameScreen = () => {
         onPress={() => deselect()}
         activeOpacity={1}
       >
-        <Text style={styles.clueText}>{clue}</Text>
+        {clue.number !== null && clue.text !== '' && (
+          <Text style={styles.clueText}>
+            {clue.number} : {clue.text}
+          </Text>
+        )}
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.keyboardContainer}
@@ -303,6 +363,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: Colors.primary,
+    textAlign: 'center',
   },
 });
 
